@@ -23,7 +23,7 @@ def main():
     # for x,y in toggle:
     #     init_cond[x][y] = 1
 
-    g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=init_cond)
+    g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=None)#init_cond)
 
     app = QApplication(sys.argv)
     main_window = MainWindow(g)
