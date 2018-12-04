@@ -39,10 +39,9 @@ class SimpleGrid(utils.list2):
         self._cell_kls = cell
 
         if initial_conditions is None:
-            cell_grid = [[init for c in range(col)] for r in range(row)]
-            for c in range(col):
-                for r in range(row):
-                    cell_grid[r][c] = self._cell_kls()
+            cell_grid = utils.list2(row, col)
+            for _, (r,c) in cell_grid.items():
+                cell_grid[r][c] = self._cell_kls()
         else:
             cell_grid = utils.list2(row, col)
             for _, (r,c) in cell_grid.items():
