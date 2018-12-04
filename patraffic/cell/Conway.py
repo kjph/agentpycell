@@ -16,11 +16,11 @@ class ConwayCell(SimpleCell):
             self._state = initial_conditions
 
     def toggle(self):
-        self._state = int(not(self._state))
+        self._state = not(self._state)
 
     @property
     def val(self):
-        return self._state
+        return int(bool(self._state))
 
     def update(self, neighbours):
         """
