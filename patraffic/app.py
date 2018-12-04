@@ -18,31 +18,16 @@ def main():
     width = 17
     height = 17
 
+    # init_cond = list2(width, height, init=0)
+    # toggle = [(6,6), (6,7), (6,8), (6,9), (6,10), (10,6), (10,7), (10,8), (10,9), (10,10), (8,6), (8,10)]
+    # for x,y in toggle:
+    #     init_cond[x][y] = 1
+
     g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=init_cond)
 
     app = QApplication(sys.argv)
     main_window = MainWindow(g)
     sys.exit(app.exec_())
-
-class SimThred(QThread):
-    def __init__(self, nticks, CellGrid, LabelGrid):
-
-        QThread.__init__(self)
-        self.CellGrid = CellGrid
-        self.nticks = nticks
-        self.LabelGrid = LabelGrid
-
-    def run(self):
-        for i in range(self.nticks):
-            time.sleep(0.05)
-            self.CellGrid.tick()
-            self.update_grid()
-
-    def update_grid(self):
-
-        for cell, (r,c) in self.CellGrid.items():
-            text = 'X' if cell.val else ''
-            self.LabelGrid[r][c].setText(text)
 
 class MainWindow(QWidget):
 
@@ -53,23 +38,6 @@ class MainWindow(QWidget):
         self.CellGrid = CellGrid
         self.threads = []
         self._init_ui()
-
-        self.NTicks = QLineEdit()
-        self.NTicks.setText("100")
-
-        self.button = QPushButton("Start")
-        self.button.setText("Start")
-
-        self.button.clicked.connect(self.simulate)
-        self.LabelGrid = LabelGrid(*(self.CellGrid.dim))
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.NTicks)
-        layout.addWidget(self.button)
-        layout.addWidget(self.LabelGrid)
-        self.setLayout(layout)
-        self.update_labels()
-        self.show()
 
     def _init_ui(self):
 
@@ -84,6 +52,25 @@ class MainWindow(QWidget):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
+        # Widgets
+        self.NTicks = QLineEdit()
+        self.NTicks.setText("10")
+
+        self.button = QPushButton("Start")
+        self.button.setText("Start")
+
+        self.button.clicked.connect(self.simulate)
+        self.LabelGrid = LabelGrid(*(self.CellGrid.dim))
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.NTicks)
+        layout.addWidget(self.button)
+        layout.addWidget(self.LabelGrid)
+        self.setLayout(layout)
+
+        self.update_labels()
+        self.show()
 
     def update_labels(self):
 
@@ -116,6 +103,26 @@ class LabelGrid(QWidget):
     def __getitem__(self, key):
 
         return self._array[key]
+
+class SimThred(QThread):
+    def __init__(self, nticks, CellGrid, LabelGrid):
+
+        QThread.__init__(self)
+        self.CellGrid = CellGrid
+        self.nticks = nticks
+        self.LabelGrid = LabelGrid
+
+    def run(self):
+        for i in range(self.nticks):
+            time.sleep(0.05)
+            self.CellGrid.tick()
+            self.update_grid()
+
+    def update_grid(self):
+
+        for cell, (r,c) in self.CellGrid.items():
+            text = 'X' if cell.val else ''
+            self.LabelGrid[r][c].setText(text)
 
 if __name__ == '__main__':
 
