@@ -30,21 +30,13 @@ class ConwayCell(SimpleCell):
             - Any live cell with more than three live neighbours dies, as if by overpopulation.
             - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
         """
-        
-        n_active_neighbours = -self._state
-        for row in neighbours:
-            for cell in row:
+
+        n_active_neighbours = 0
+        for cell in neighbours:
+            if cell is not None:
                 n_active_neighbours += cell.val
 
-        if self._state:
-            if n_active_neighbours < 2:
-                self._state = 0
-            elif n_active_neighbours in (2,3):
-                self._state = 1
-            elif n_active_neighbours > 3:
-                self._state = 0
-        else:
-            if n_active_neighbours == 3:
-                self._state = 1
-            else:
-                self._state = 0
+        if self._state and ((n_active_neighbours < 2) or (n_active_neighbours > 3)):
+            self.toggle()
+        elif not(self._state) and n_active_neighbours == 3:
+            self.toggle()
