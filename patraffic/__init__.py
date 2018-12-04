@@ -16,6 +16,9 @@ class SimpleCell(abc.ABC):
     is a function only of its direct neighbours.
     """
 
+    def __init__(self, initial_conditions=None):
+        pass
+
     @abc.abstractmethod
     def update(self, neighbours):
         pass
@@ -70,15 +73,25 @@ class SimpleGrid(utils.list2):
         self._tick_method(*args, **kwargs)
 
     def get_neighbours(self, r, c):
+        """ Returns the subset that surrounds point (r,c). Note that the start 
+        position of this subset is always up one, left one. But if (r,c) is on
+        a boundary then:
+            - 'up one, left one' will give a negative index, hence start uses
+              max()
+            - the nrow's or ncol's will be less hence the ternary operators
+        """
 
-        _r, _c = self.dim
+        start = (max(0, r-1), max(0, c-1))
 
-        start = (max(0, r-1), max(0, c-1))      
-        nrow = 2 if (r == 0 or r == _r-1) else 3
-        ncol = 2 if (c == 0 or c == _c-1) else 3
-        
+        maxr, maxc = self.dim
+        nrow = 2 if (r == 0 or r == maxr-1) else 3
+        ncol = 2 if (c == 0 or c == maxc-1) else 3
+
         neighbours = self.subset(start, nrow, ncol)
-        neighbours[1][1] = None
+        this_r = 0 if (r == 0) else 1
+        this_c = 0 if (c == 0) else 1
+
+        neighbours[this_r][this_c] = None
         return neighbours
 
     def tick_staged(self, *args, **kwargs):

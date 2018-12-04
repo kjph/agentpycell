@@ -18,12 +18,6 @@ def main():
     width = 17
     height = 17
 
-    init_cond = list2(width, height)
-    toggle = [(6,6), (6,7), (6,8), (6,9), (6,10), (10,6), (10,7), (10,8), (10,9), (10,10), (8,6), (8,10)]
-    #toggle = [(1,1)]
-    for x,y in toggle:
-        init_cond[x][y] = 1
-
     g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=init_cond)
 
     app = QApplication(sys.argv)
@@ -31,82 +25,51 @@ def main():
     sys.exit(app.exec_())
 
 class SimThred(QThread):
-    def __init__(self, abm, ticks, ui_grid):
+    def __init__(self, nticks, CellGrid, LabelGrid):
+
         QThread.__init__(self)
-        self._abm = abm
-        self._ticks = ticks
-        self._ui = ui_grid
+        self.CellGrid = CellGrid
+        self.nticks = nticks
+        self.LabelGrid = LabelGrid
 
     def run(self):
-
-        #self._abm.reset_grid()
-        width, height = self._abm.dim
-        y_sweep = [y for y in range(height)]
-        x_sweep = [x for x in range(width)]
-
-        for i in range(self._ticks):
+        for i in range(self.nticks):
             time.sleep(0.05)
-            self._abm.tick()
+            self.CellGrid.tick()
+            self.update_grid()
 
-            for y in y_sweep:
-                for x in x_sweep:
-                    cell = self._abm[x][y]
-                    if cell.val:
-                        self._ui[x][y].setText('X')
-                    else:
-                        self._ui[x][y].setText('')
+    def update_grid(self):
+
+        for cell, (r,c) in self.CellGrid.items():
+            text = 'X' if cell.val else ''
+            self.LabelGrid[r][c].setText(text)
 
 class MainWindow(QWidget):
 
-    def __init__(self, ABMGrid, *args, **kwargs):
+    def __init__(self, CellGrid, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
-        self._abm = ABMGrid
+
+        self.CellGrid = CellGrid
+        self.threads = []
         self._init_ui()
-        #self._init_menu()
 
         self.NTicks = QLineEdit()
-        self.NTicks.setObjectName("#Ticks")
         self.NTicks.setText("100")
 
         self.button = QPushButton("Start")
-        self.button.setObjectName("Start")
-        self.button.setText("Start") 
+        self.button.setText("Start")
 
         self.button.clicked.connect(self.simulate)
-        self.CellGrid = CellGrid(self._abm)
+        self.LabelGrid = LabelGrid(*(self.CellGrid.dim))
 
         layout = QVBoxLayout()
         layout.addWidget(self.NTicks)
         layout.addWidget(self.button)
-        layout.addWidget(self.CellGrid)
+        layout.addWidget(self.LabelGrid)
         self.setLayout(layout)
-
-        self.threads = []
-        self.update_grid()
-
+        self.update_labels()
         self.show()
-
-    def update_grid(self):
-
-        width, height = self._abm.dim
-        y_sweep = [y for y in range(height)]
-        x_sweep = [x for x in range(width)]
-
-        for y in y_sweep:
-            for x in x_sweep:
-                cell = self._abm[x][y]
-                if cell.val:
-                    self.CellGrid._grid[x][y].setText('X')
-                else:
-                    self.CellGrid._grid[x][y].setText('')
-
-    def simulate(self):
-
-        n_ticks = int(self.NTicks.text())
-        s = SimThred(self._abm, n_ticks, self.CellGrid._grid)
-        self.threads.append(s)
-        s.start()
 
     def _init_ui(self):
 
@@ -122,28 +85,37 @@ class MainWindow(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-class CellGrid(QWidget):
+    def update_labels(self):
 
-    def __init__(self, abm):
-        super(QWidget, self).__init__()
-        self._abm = abm
-        _grid = QGridLayout()
+        for cell, (r,c) in self.CellGrid.items():
+            text = 'X' if cell.val else ''
+            self.LabelGrid[r][c].setText(text)
 
-        width, height = self._abm.dim
+    def simulate(self):
 
-        positions = [(i,j) for i in range(width) for j in range(height)]
-        self._grid = [[None for y in range(height)] for x in range(width)]
+        n_ticks = int(self.NTicks.text())
+        s = SimThred(n_ticks, self.CellGrid, self.LabelGrid)
+        self.threads.append(s)
+        s.start()
 
-        for x,y in positions:
+class LabelGrid(QWidget):
 
+    def __init__(self, nrow, ncol):
+
+        super().__init__()
+        qgid = QGridLayout()
+        self._array = list2(nrow, ncol)
+
+        for _, (r,c) in self._array.items():
             label = QLabel('')
-            self._grid[x][y] = label
+            self._array[r][c] = label
+            qgid.addWidget(label, *(c,r))
 
-            _grid.addWidget(label, *(y,x))
+        self.setLayout(qgid)
 
-        #self.move(300, 150)
-        self.setLayout(_grid)
+    def __getitem__(self, key):
 
+        return self._array[key]
 
 if __name__ == '__main__':
 
