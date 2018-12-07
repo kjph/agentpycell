@@ -102,3 +102,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+git_commit_msg.txt

@@ -6,7 +6,7 @@ def test_indexing():
 
     l = list2(3, 4)
 
-    assert l.size == (3,4)
+    assert l.dim == (3,4)
     assert len(l) == 12
 
     l[2][3] = 9912

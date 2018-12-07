@@ -18,12 +18,12 @@ def main():
     width = 17
     height = 17
 
-    # init_cond = list2(width, height, init=0)
-    # toggle = [(6,6), (6,7), (6,8), (6,9), (6,10), (10,6), (10,7), (10,8), (10,9), (10,10), (8,6), (8,10)]
-    # for x,y in toggle:
-    #     init_cond[x][y] = 1
+    init_cond = list2(width, height, init=0)
+    toggle = [(6,6), (6,7), (6,8), (6,9), (6,10), (10,6), (10,7), (10,8), (10,9), (10,10), (8,6), (8,10)]
+    for x,y in toggle:
+        init_cond[x][y] = 1
 
-    g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=None)#init_cond)
+    g = SimpleGrid(width, height, cell=ConwayCell, real_time=False, initial_conditions=init_cond)
 
     app = QApplication(sys.argv)
     main_window = MainWindow(g)
