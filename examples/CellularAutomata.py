@@ -2,9 +2,9 @@ import sys
 import time
 
 import random
-from patraffic import SimpleGrid
-from patraffic.cell import ConwayCell
-from patraffic.utils import list2
+from agentpycell import SimpleGrid
+from agentpycell.cell import ConwayCell
+from agentpycell.utils import list2
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -114,7 +114,7 @@ class SimThred(QThread):
 
     def run(self):
         for i in range(self.nticks):
-            time.sleep(0.05)
+            time.sleep(0.1)
             self.CellGrid.tick()
             self.update_grid()
 
